@@ -1,0 +1,10 @@
+{
+    "vercel": {
+        "builds": [
+            {
+                "src": "main.py",
+                "use": "@vercel/python"
+            }
+        ]
+    }
+}
