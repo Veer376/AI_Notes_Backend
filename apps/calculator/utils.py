@@ -30,9 +30,9 @@ def analyze_image(img: Image, dict_of_vars: dict):
         f"DO NOT USE BACKTICKS OR MARKDOWN FORMATTING. "
         f"PROPERLY QUOTE THE KEYS AND VALUES IN THE DICTIONARY FOR EASIER PARSING WITH Python's ast.literal_eval."
     )
-    print("before generating content")
+    
     response = model.generate_content([prompt, img])
-    print("after generating content")
+    print("response: ", response)
     answers = []
     try:
         answers = ast.literal_eval(response.text)
