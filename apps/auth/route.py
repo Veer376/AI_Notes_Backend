@@ -43,8 +43,8 @@ def login(user: schema.UserCred, response: Response):
         key="token",
         value=token,
         # httponly=True,  # Prevents JavaScript from accessing the token
-        secure=False,   # Change to True in production (HTTPS required)
-        samesite="none"
+        secure=True,   # Change to True in production (HTTPS required)
+        samesite="None"
     )
     return {"token": token, "email" : user.email}
 
