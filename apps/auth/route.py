@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import APIRouter, HTTPException, Request, Response
-from .models import db
+from models import db
 import schema
 import bcrypt
 from .utils import *
@@ -11,7 +11,7 @@ auth_router = APIRouter(prefix='/auth')
 def test():
     return {"message" : "auth route working"}
 
-@auth_router.post('/register', response_model=schema.User)
+@auth_router.post('/register')
 def register(user: schema.UserCred):
     # Check if user already exists
     existing_user = db.users.find_one({"email": user.email})
@@ -19,14 +19,14 @@ def register(user: schema.UserCred):
         raise HTTPException(status_code=409, detail="Email already registered")
     try:
         db.users.insert_one({"email": user.email, "password": hash_password(user.password)})
-        return user
+        return {"message": "User registered successfully"}
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=e)
 
 
 
-@auth_router.post('/login', response_model=dict)
+@auth_router.post('/login', response_model = schema.User)
 def login(user: schema.UserCred, response: Response):
     
     existing_user = db.users.find_one({"email": user.email})
@@ -46,20 +46,24 @@ def login(user: schema.UserCred, response: Response):
         secure=True,   # Change to True in production (HTTPS required)
         samesite="None"
     )
-    return {"token": token, "email" : user.email}
+    print(token)
+    return schema.User(email = existing_user['email'], notes = existing_user.get("notes", []))
 
 
-@auth_router.get('/getProfile', response_model=dict)
+@auth_router.get('/getProfile', response_model = schema.User)
 def getuser(request: Request):
-    print(request.cookies)
+    
     token = request.cookies.get('token')
     
     if token is None:
+        print('No token found')
         raise HTTPException(status_code=401, detail="Invalid token")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return {"email": payload.get("sub")}
+        user = db.users.find_one({"email": payload.get("sub")})
+        return schema.User(email = user.get('email'), notes = user.get("notes", []))
+    
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.JWTError:
+    except :
         raise HTTPException(status_code=401, detail="Invalid token")

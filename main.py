@@ -7,7 +7,7 @@ from constants import SERVER_URL, PORT, ENV
 import google.generativeai as genai
 import os
 from apps.auth.route import auth_router
-
+from apps.notes.route import notes_router
 
 app = FastAPI()
 
@@ -35,5 +35,6 @@ async def root():
 # @/calculate
 app.include_router(calculator_router)
 app.include_router(auth_router)
+app.include_router(notes_router)
 
 
